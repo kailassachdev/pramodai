@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"; // Import Toaster
 
 export const metadata: Metadata = {
-  title: 'AgriAssist AI',
-  description: 'Intelligent plant diagnosis and care recommendations by AgriAssist AI',
+  title: 'Pramod AI',
+  description: 'Intelligent plant diagnosis and care recommendations by Pramod AI',
 };
 
 export default function RootLayout({

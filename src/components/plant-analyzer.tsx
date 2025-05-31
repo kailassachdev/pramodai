@@ -129,7 +129,7 @@ export default function PlantAnalyzer() {
 
       <header className="mb-8 text-center">
         <h1 className="text-4xl font-extrabold text-primary mb-2 font-headline drop-shadow-md">
-          🌿 AgriAssist AI
+          🌿 Pramod AI
         </h1>
         <p className="text-lg text-muted-foreground">Your personal plant health expert.</p>
       </header>
@@ -318,9 +318,8 @@ export default function PlantAnalyzer() {
         </Card>
       )}
       <footer className="mt-12 text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} AgriAssist AI. Powered by GenAI.</p>
+        <p>&copy; {new Date().getFullYear()} Pramod AI. Powered by GenAI.</p>
       </footer>
     </div>
   );
 }
-
