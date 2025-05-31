@@ -3,12 +3,14 @@
 
 import React, { useState, useEffect, ChangeEvent } from 'react';
 import Image from 'next/image';
-import { Camera, MapPin, Loader2, Leaf, FlaskConical, SprayCan, Droplet, Sun, AlertCircle, Sprout } from 'lucide-react';
+import { Camera, MapPin, Loader2, Leaf, FlaskConical, SprayCan, Droplet, Sun, AlertCircle, Sprout, Languages } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { analyzePlant, AnalyzePlantOutput, AnalyzePlantInput } from '@/ai/flows/analyze-plant';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export default function PlantAnalyzer() {
   const [plantImageDataUri, setPlantImageDataUri] = useState<string | null>(null);
@@ -16,6 +18,7 @@ export default function PlantAnalyzer() {
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalyzePlantOutput | null>(null);
   const [errorDialog, setErrorDialog] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
+  const [language, setLanguage] = useState<'english' | 'malayalam'>('english');
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -86,6 +89,7 @@ export default function PlantAnalyzer() {
         photoDataUri: plantImageDataUri,
         latitude: location.lat,
         longitude: location.lon,
+        language: language,
       };
       const result = await analyzePlant(input);
       setAnalysisResult(result);
@@ -189,7 +193,7 @@ export default function PlantAnalyzer() {
             )}
           </div>
 
-          <div className="mb-8">
+          <div className="mb-6">
             <label className="block text-lg font-medium text-foreground mb-2 font-headline">
               2. Get Geographical Location
             </label>
@@ -207,6 +211,18 @@ export default function PlantAnalyzer() {
               </p>
             )}
           </div>
+
+          <div className="mb-6 flex items-center space-x-2 justify-center">
+            <Switch
+              id="language-switch"
+              checked={language === 'malayalam'}
+              onCheckedChange={(checked) => setLanguage(checked ? 'malayalam' : 'english')}
+            />
+            <Label htmlFor="language-switch" className="text-foreground flex items-center">
+              <Languages className="w-4 h-4 mr-2"/> Show results in Malayalam
+            </Label>
+          </div>
+
 
           <Button
             onClick={handleAnalyzePlant}
@@ -238,32 +254,32 @@ export default function PlantAnalyzer() {
             {analysisResult.identification && (
               <div className="mb-4">
                 <h3 className={`text-xl font-semibold text-foreground flex items-center mb-2 font-headline`}>
-                  <Sprout className={`w-5 h-5 mr-2 text-green-600`} /> Plant Identification:
+                  <Sprout className={`w-5 h-5 mr-2 text-green-600`} /> {language === 'malayalam' ? 'സസ്യ തിരിച്ചറിയൽ' : 'Plant Identification'}:
                 </h3>
                 <ul className="list-none text-muted-foreground ml-4 space-y-1">
                   <li>
-                    <span className="font-medium text-foreground">Is it a plant?</span> {analysisResult.identification.isPlant ? 'Yes' : 'No'}
+                    <span className="font-medium text-foreground">{language === 'malayalam' ? ' ഇതൊരു സസ്യമാണോ?' : 'Is it a plant?'}</span> {analysisResult.identification.isPlant ? (language === 'malayalam' ? 'അതെ' : 'Yes') : (language === 'malayalam' ? 'അല്ല' : 'No')}
                   </li>
                   {analysisResult.identification.isPlant && analysisResult.identification.commonName && (
                     <li>
-                      <span className="font-medium text-foreground">Common Name:</span> {analysisResult.identification.commonName}
+                      <span className="font-medium text-foreground">{language === 'malayalam' ? 'സാധാരണ പേര്:' : 'Common Name:'}</span> {analysisResult.identification.commonName}
                     </li>
                   )}
                   {analysisResult.identification.isPlant && analysisResult.identification.latinName && (
                     <li>
-                      <span className="font-medium text-foreground">Latin Name:</span> <em className="italic">{analysisResult.identification.latinName}</em>
+                      <span className="font-medium text-foreground">{language === 'malayalam' ? 'ലാറ്റിൻ പേര്:' : 'Latin Name:'}</span> <em className="italic">{analysisResult.identification.latinName}</em>
                     </li>
                   )}
                    {!analysisResult.identification.isPlant && (
-                     <li>The image provided does not appear to be a plant.</li>
+                     <li>{language === 'malayalam' ? 'നൽകിയിട്ടുള്ള ചിത്രം ഒരു സസ്യമായി തോന്നുന്നില്ല.' : 'The image provided does not appear to be a plant.'}</li>
                    )}
                 </ul>
               </div>
             )}
 
-            <AnalysisSection title="Problems" items={analysisResult.problems} icon={Leaf} iconColorClass="text-destructive" />
-            <AnalysisSection title="Diseases" items={analysisResult.diseases} icon={FlaskConical} iconColorClass="text-purple-600" />
-            <AnalysisSection title="Solutions" items={analysisResult.solutions} icon={Droplet} iconColorClass="text-blue-500" />
+            <AnalysisSection title={language === 'malayalam' ? "പ്രശ്നങ്ങൾ" : "Problems"} items={analysisResult.problems} icon={Leaf} iconColorClass="text-destructive" />
+            <AnalysisSection title={language === 'malayalam' ? "രോഗങ്ങൾ" : "Diseases"} items={analysisResult.diseases} icon={FlaskConical} iconColorClass="text-purple-600" />
+            <AnalysisSection title={language === 'malayalam' ? "പരിഹാരങ്ങൾ" : "Solutions"} items={analysisResult.solutions} icon={Droplet} iconColorClass="text-blue-500" />
 
             {analysisResult.recommendations && 
              (analysisResult.recommendations.manure?.length ||
@@ -271,29 +287,29 @@ export default function PlantAnalyzer() {
               analysisResult.recommendations.pesticide?.length) && (
               <div className="mb-4">
                 <h3 className="text-xl font-semibold text-foreground flex items-center mb-2 font-headline">
-                  <SprayCan className="w-5 h-5 mr-2 text-orange-500" /> Recommendations:
+                  <SprayCan className="w-5 h-5 mr-2 text-orange-500" /> {language === 'malayalam' ? "ശുപാർശകൾ" : "Recommendations"}:
                 </h3>
                 <ul className="list-disc list-inside text-muted-foreground ml-4 space-y-1">
                   {analysisResult.recommendations.manure && analysisResult.recommendations.manure.length > 0 && (
                     <li>
-                      <span className="font-medium text-foreground">Manure:</span> {analysisResult.recommendations.manure.join(', ')}
+                      <span className="font-medium text-foreground">{language === 'malayalam' ? "ചാണകം:" : "Manure:"}</span> {analysisResult.recommendations.manure.join(', ')}
                     </li>
                   )}
                   {analysisResult.recommendations.fertilizer && analysisResult.recommendations.fertilizer.length > 0 && (
                     <li>
-                      <span className="font-medium text-foreground">Fertilizer:</span> {analysisResult.recommendations.fertilizer.join(', ')}
+                      <span className="font-medium text-foreground">{language === 'malayalam' ? "വളം:" : "Fertilizer:"}</span> {analysisResult.recommendations.fertilizer.join(', ')}
                     </li>
                   )}
                   {analysisResult.recommendations.pesticide && analysisResult.recommendations.pesticide.length > 0 && (
                     <li>
-                      <span className="font-medium text-foreground">Pesticide:</span> {analysisResult.recommendations.pesticide.join(', ')}
+                      <span className="font-medium text-foreground">{language === 'malayalam' ? "കീടനാശിനി:" : "Pesticide:"}</span> {analysisResult.recommendations.pesticide.join(', ')}
                     </li>
                   )}
                 </ul>
               </div>
             )}
             
-            <AnalysisSection title="Vitamin Deficiencies" items={analysisResult.vitaminDeficiencies} icon={Sun} iconColorClass="text-yellow-500" />
+            <AnalysisSection title={language === 'malayalam' ? "വിറ്റാമിൻ കുറവുകൾ" : "Vitamin Deficiencies"} items={analysisResult.vitaminDeficiencies} icon={Sun} iconColorClass="text-yellow-500" />
             
             {
               (!analysisResult.problems || analysisResult.problems.length === 0) &&
@@ -306,7 +322,7 @@ export default function PlantAnalyzer() {
               )) &&
               (!analysisResult.vitaminDeficiencies || analysisResult.vitaminDeficiencies.length === 0) &&
               (analysisResult.identification && !analysisResult.identification.isPlant) && ( 
-                <p className="text-center text-muted-foreground">No plant-related issues identified. Please upload an image of a plant for analysis.</p>
+                <p className="text-center text-muted-foreground">{language === 'malayalam' ? 'സസ്യങ്ങളുമായി ബന്ധപ്പെട്ട പ്രശ്‌നങ്ങളൊന്നും കണ്ടെത്തിയില്ല. വിശകലനത്തിനായി ഒരു സസ്യത്തിന്റെ ചിത്രം അപ്‌ലോഡ് ചെയ്യുക.' : 'No plant-related issues identified. Please upload an image of a plant for analysis.'}</p>
               )
             }
              { 
@@ -320,7 +336,7 @@ export default function PlantAnalyzer() {
                 (!analysisResult.recommendations.pesticide || analysisResult.recommendations.pesticide.length === 0)
               )) &&
               (!analysisResult.vitaminDeficiencies || analysisResult.vitaminDeficiencies.length === 0) && (
-                <p className="text-center text-muted-foreground">No specific issues identified. Your plant appears to be in perfect condition!</p>
+                <p className="text-center text-muted-foreground">{language === 'malayalam' ? 'പ്രത്യേകിച്ച് പ്രശ്‌നങ്ങളൊന്നും കണ്ടെത്തിയില്ല. നിങ്ങളുടെ സസ്യം തികഞ്ഞ അവസ്ഥയിലാണെന്ന് തോന്നുന്നു!' : 'No specific issues identified. Your plant appears to be in perfect condition!'}</p>
               )
             }
           </CardContent>
@@ -332,3 +348,4 @@ export default function PlantAnalyzer() {
     </div>
   );
 }
+
