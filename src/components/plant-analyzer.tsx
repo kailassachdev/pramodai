@@ -45,9 +45,18 @@ export default function PlantAnalyzer() {
             lon: position.coords.longitude,
           });
         },
-        (error) => {
-          console.error("Geolocation error:", error);
-          setErrorDialog({ open: true, message: 'Could not retrieve location. Please enable location services and try again.' });
+        (error: GeolocationPositionError) => {
+          console.error("Geolocation error code:", error.code);
+          console.error("Geolocation error message:", error.message);
+          let userMessage = 'Could not retrieve location. Please enable location services and try again.';
+          if (error.code === error.PERMISSION_DENIED) {
+            userMessage = 'Location access denied. Please enable location permissions in your browser settings.';
+          } else if (error.code === error.POSITION_UNAVAILABLE) {
+            userMessage = 'Location information is unavailable. Please try again later or check your device settings.';
+          } else if (error.code === error.TIMEOUT) {
+            userMessage = 'Getting location timed out. Please try again.';
+          }
+          setErrorDialog({ open: true, message: userMessage });
           setLocation(null);
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
