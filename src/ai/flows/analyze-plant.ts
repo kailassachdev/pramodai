@@ -92,7 +92,14 @@ const analyzePlantFlow = ai.defineFlow(
     outputSchema: AnalyzePlantOutputSchema,
   },
   async input => {
-    const {output} = await analyzePlantPrompt(input);
-    return output!;
+    const response = await analyzePlantPrompt(input);
+    if (!response.output) {
+      // Log this server-side for visibility if possible. Netlify logs should capture this.
+      console.error(`[analyzePlantFlow] Prompt returned no output. Input: ${JSON.stringify(input)}. Language: ${input.language}.`);
+      throw new Error(
+        'The AI model did not return a valid analysis. This could be due to the input image, content safety filters, or a temporary model issue. Please try a different image or try again later.'
+      );
+    }
+    return response.output;
   }
 );
