@@ -60,9 +60,10 @@ Your response MUST be in the language specified by the '{{language}}' parameter.
 First, identify the plant in the provided image. Determine if it is indeed a plant.
 If it is, provide its common name (in {{language}}) and Latin (scientific) name.
 
-Then, analyze the provided plant image and the given geographical coordinates (latitude: {{{latitude}}}, longitude: {{{longitude}}})
-to identify potential problems, diseases, solutions, appropriate manure/fertilizer/pesticide, and vitamin deficiencies.
-Consider the climate and soil type implied by the geographical location in your analysis.
+Then, analyze the provided plant image.
+Use the given geographical coordinates (latitude: {{{latitude}}}, longitude: {{{longitude}}}) to infer local soil types and climatic patterns.
+Incorporate this understanding of soil and climate to provide a more precise and locally relevant analysis.
+Identify potential problems, diseases, solutions, appropriate manure/fertilizer/pesticide, and vitamin deficiencies.
 All textual descriptions in your response MUST be in {{language}}.
 
 Output fields (Ensure all text descriptions are in {{language}}):
@@ -95,4 +96,3 @@ const analyzePlantFlow = ai.defineFlow(
     return output!;
   }
 );
-
