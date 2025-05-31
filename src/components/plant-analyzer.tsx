@@ -62,7 +62,7 @@ export default function PlantAnalyzer() {
           setErrorDialog({ open: true, message: userMessage });
           setLocation(null);
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 } // Increased timeout to 20 seconds
       );
     } else {
       setErrorDialog({ open: true, message: 'Geolocation is not supported by your browser.' });
