@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, ChangeEvent } from 'react';
@@ -295,11 +296,11 @@ export default function PlantAnalyzer() {
                 (!analysisResult.recommendations.pesticide || analysisResult.recommendations.pesticide.length === 0)
               )) &&
               (!analysisResult.vitaminDeficiencies || analysisResult.vitaminDeficiencies.length === 0) &&
-              (analysisResult.identification && !analysisResult.identification.isPlant) && ( // Check if identification exists and it's not a plant
+              (analysisResult.identification && !analysisResult.identification.isPlant) && ( 
                 <p className="text-center text-muted-foreground">No plant-related issues identified. Please upload an image of a plant for analysis.</p>
               )
             }
-             { /* If it is a plant and no issues, then suggest it might be healthy */
+             { 
               analysisResult.identification && analysisResult.identification.isPlant &&
               (!analysisResult.problems || analysisResult.problems.length === 0) &&
               (!analysisResult.diseases || analysisResult.diseases.length === 0) &&
@@ -310,7 +311,7 @@ export default function PlantAnalyzer() {
                 (!analysisResult.recommendations.pesticide || analysisResult.recommendations.pesticide.length === 0)
               )) &&
               (!analysisResult.vitaminDeficiencies || analysisResult.vitaminDeficiencies.length === 0) && (
-                <p className="text-center text-muted-foreground">No specific issues identified. Your plant might be healthy!</p>
+                <p className="text-center text-muted-foreground">No specific issues identified. Your plant appears to be in perfect condition!</p>
               )
             }
           </CardContent>
@@ -322,3 +323,4 @@ export default function PlantAnalyzer() {
     </div>
   );
 }
+
