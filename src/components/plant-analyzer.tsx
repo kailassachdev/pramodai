@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, ChangeEvent } from 'react';
 import Image from 'next/image';
-import { Camera, MapPin, Loader2, Leaf, FlaskConical, SprayCan, Droplet, Sun, AlertCircle } from 'lucide-react';
+import { Camera, MapPin, Loader2, Leaf, FlaskConical, SprayCan, Droplet, Sun, AlertCircle, Sprout } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -151,8 +151,8 @@ export default function PlantAnalyzer() {
                   <Image
                     src={plantImageDataUri}
                     alt="Plant Preview"
-                    width={176} // h-44 roughly
-                    height={176} // h-44 roughly
+                    width={176} 
+                    height={176} 
                     className="max-h-44 object-contain rounded-lg"
                   />
                 ) : (
@@ -225,6 +225,32 @@ export default function PlantAnalyzer() {
             <CardTitle className="text-2xl font-bold text-primary text-center font-headline">Analysis Results</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
+            {analysisResult.identification && (
+              <div className="mb-4">
+                <h3 className={`text-xl font-semibold text-foreground flex items-center mb-2 font-headline`}>
+                  <Sprout className={`w-5 h-5 mr-2 text-green-600`} /> Plant Identification:
+                </h3>
+                <ul className="list-none text-muted-foreground ml-4 space-y-1">
+                  <li>
+                    <span className="font-medium text-foreground">Is it a plant?</span> {analysisResult.identification.isPlant ? 'Yes' : 'No'}
+                  </li>
+                  {analysisResult.identification.isPlant && analysisResult.identification.commonName && (
+                    <li>
+                      <span className="font-medium text-foreground">Common Name:</span> {analysisResult.identification.commonName}
+                    </li>
+                  )}
+                  {analysisResult.identification.isPlant && analysisResult.identification.latinName && (
+                    <li>
+                      <span className="font-medium text-foreground">Latin Name:</span> <em className="italic">{analysisResult.identification.latinName}</em>
+                    </li>
+                  )}
+                   {!analysisResult.identification.isPlant && (
+                     <li>The image provided does not appear to be a plant.</li>
+                   )}
+                </ul>
+              </div>
+            )}
+
             <AnalysisSection title="Problems" items={analysisResult.problems} icon={Leaf} iconColorClass="text-destructive" />
             <AnalysisSection title="Diseases" items={analysisResult.diseases} icon={FlaskConical} iconColorClass="text-purple-600" />
             <AnalysisSection title="Solutions" items={analysisResult.solutions} icon={Droplet} iconColorClass="text-blue-500" />
@@ -268,8 +294,23 @@ export default function PlantAnalyzer() {
                 (!analysisResult.recommendations.fertilizer || analysisResult.recommendations.fertilizer.length === 0) &&
                 (!analysisResult.recommendations.pesticide || analysisResult.recommendations.pesticide.length === 0)
               )) &&
+              (!analysisResult.vitaminDeficiencies || analysisResult.vitaminDeficiencies.length === 0) &&
+              (analysisResult.identification && !analysisResult.identification.isPlant) && ( // Check if identification exists and it's not a plant
+                <p className="text-center text-muted-foreground">No plant-related issues identified. Please upload an image of a plant for analysis.</p>
+              )
+            }
+             { /* If it is a plant and no issues, then suggest it might be healthy */
+              analysisResult.identification && analysisResult.identification.isPlant &&
+              (!analysisResult.problems || analysisResult.problems.length === 0) &&
+              (!analysisResult.diseases || analysisResult.diseases.length === 0) &&
+              (!analysisResult.solutions || analysisResult.solutions.length === 0) &&
+              (!analysisResult.recommendations || (
+                (!analysisResult.recommendations.manure || analysisResult.recommendations.manure.length === 0) &&
+                (!analysisResult.recommendations.fertilizer || analysisResult.recommendations.fertilizer.length === 0) &&
+                (!analysisResult.recommendations.pesticide || analysisResult.recommendations.pesticide.length === 0)
+              )) &&
               (!analysisResult.vitaminDeficiencies || analysisResult.vitaminDeficiencies.length === 0) && (
-                <p className="text-center text-muted-foreground">No specific issues identified or analysis inconclusive. Your plant might be healthy!</p>
+                <p className="text-center text-muted-foreground">No specific issues identified. Your plant might be healthy!</p>
               )
             }
           </CardContent>

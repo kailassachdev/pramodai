@@ -2,7 +2,8 @@
 'use server';
 /**
  * @fileOverview A plant analysis AI agent that takes an image and location
- * and returns an analysis of the plant's health, potential problems, and recommendations.
+ * and returns an analysis of the plant's health, potential problems, and recommendations,
+ * as well as identifying the plant.
  *
  * - analyzePlant - A function that handles the plant analysis process.
  * - AnalyzePlantInput - The input type for the analyzePlant function.
@@ -24,6 +25,11 @@ const AnalyzePlantInputSchema = z.object({
 export type AnalyzePlantInput = z.infer<typeof AnalyzePlantInputSchema>;
 
 const AnalyzePlantOutputSchema = z.object({
+  identification: z.object({
+    isPlant: z.boolean().describe('Whether or not the image contains a plant.'),
+    commonName: z.string().optional().describe('The common name of the identified plant.'),
+    latinName: z.string().optional().describe('The Latin name (scientific name) of the identified plant.'),
+  }).describe('Identification of the plant in the image.'),
   problems: z.array(z.string()).describe('Potential problems with the plant.'),
   diseases: z.array(z.string()).describe('Potential diseases affecting the plant.'),
   solutions: z.array(z.string()).describe('Possible solutions to the plant problems.'),
@@ -48,10 +54,14 @@ const analyzePlantPrompt = ai.definePrompt({
   output: {schema: AnalyzePlantOutputSchema},
   prompt: `You are a highly knowledgeable agricultural expert and plant diagnostician.
 
-Analyze the provided plant image and the given geographical coordinates (latitude: {{{latitude}}}, longitude: {{{longitude}}})
+First, identify the plant in the provided image. Determine if it is indeed a plant. If it is, provide its common name and Latin (scientific) name.
+
+Then, analyze the provided plant image and the given geographical coordinates (latitude: {{{latitude}}}, longitude: {{{longitude}}})
 to identify potential problems, diseases, solutions, appropriate manure/fertilizer/pesticide, and vitamin deficiencies.
 Consider the climate and soil type implied by the geographical location in your analysis.
 
+Output fields:
+Identification: Include isPlant (boolean), commonName (string, optional), latinName (string, optional).
 Problems: List potential problems with the plant.
 Diseases: List potential diseases affecting the plant.
 Solutions: List possible solutions to the plant problems.
