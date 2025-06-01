@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
     ],
   },
   serverActions: {
-    bodySizeLimit: '15mb', // Increased body size limit for Server Actions
+    bodySizeLimit: 15 * 1024 * 1024, // 15MB in bytes
   },
 };
 
