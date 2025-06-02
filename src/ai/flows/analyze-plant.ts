@@ -1,6 +1,6 @@
 
 // src/ai/flows/analyze-plant.ts
-'use server';
+// 'use server'; // Removed this line to resolve build error
 /**
  * @fileOverview A plant analysis AI agent that takes an image and location
  * and returns an analysis of the plant's health, potential problems, and recommendations,
