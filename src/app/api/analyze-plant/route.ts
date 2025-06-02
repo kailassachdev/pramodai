@@ -24,16 +24,13 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('[API /api/analyze-plant] Error during analysis:', error);
     let errorMessage = 'An unexpected error occurred during analysis.';
-    let statusCode = 500;
+    // Use the status from the error if available, otherwise default to 500
+    let statusCode = error?.status || 500; 
 
     if (error.message) {
         errorMessage = error.message;
     }
     
-    // You could add more specific error handling here if Genkit or your flow throws custom errors
-    // For example, if error.status is available:
-    // if (error.status) statusCode = error.status;
-
     return NextResponse.json(
       { message: errorMessage },
       { status: statusCode }
