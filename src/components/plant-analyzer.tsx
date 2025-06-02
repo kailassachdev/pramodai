@@ -7,7 +7,9 @@ import { Camera, MapPin, Loader2, Leaf, FlaskConical, SprayCan, Droplet, Sun, Al
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { analyzePlant, AnalyzePlantOutput, AnalyzePlantInput } from '@/ai/flows/analyze-plant';
+// Removed direct import of analyzePlant Server Action
+// import { analyzePlant, AnalyzePlantOutput, AnalyzePlantInput } from '@/ai/flows/analyze-plant';
+import type { AnalyzePlantOutput, AnalyzePlantInput } from '@/ai/flows/analyze-plant'; // Import types only
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -62,7 +64,7 @@ export default function PlantAnalyzer() {
           setErrorDialog({ open: true, message: userMessage });
           setLocation(null);
         },
-        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 } // Increased timeout to 20 seconds
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
       );
     } else {
       setErrorDialog({ open: true, message: 'Geolocation is not supported by your browser.' });
@@ -91,13 +93,35 @@ export default function PlantAnalyzer() {
         longitude: location.lon,
         language: language,
       };
-      const result = await analyzePlant(input);
+
+      const response = await fetch('/api/analyze-plant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(input),
+      });
+
+      if (!response.ok) {
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          // If parsing JSON fails, use status text
+          errorData = { message: response.statusText || 'Server returned an error.' };
+        }
+        console.error("Error from API:", errorData);
+        throw new Error(errorData.message || `Analysis failed with status: ${response.status}`);
+      }
+
+      const result: AnalyzePlantOutput = await response.json();
       setAnalysisResult(result);
+
     } catch (error) {
       console.error("Error analyzing plant:", error);
       let errorMessage = 'An error occurred during analysis. Please try again.';
       if (error instanceof Error) {
-        errorMessage = `Analysis failed: ${error.message}. Check console for details.`;
+        errorMessage = `Analysis failed: ${error.message}`;
       }
       setErrorDialog({ open: true, message: errorMessage });
     } finally {
@@ -175,7 +199,7 @@ export default function PlantAnalyzer() {
                     <p className="mb-2 text-sm text-muted-foreground text-center">
                       <span className="font-semibold text-primary">Click to upload</span> or drag and drop
                     </p>
-                    <p className="text-xs text-muted-foreground">PNG, JPG, HEIC (MAX. 5MB)</p>
+                    <p className="text-xs text-muted-foreground">PNG, JPG, HEIC (MAX. 15MB recommended)</p>
                   </div>
                 )}
                 <Input
@@ -348,4 +372,3 @@ export default function PlantAnalyzer() {
     </div>
   );
 }
-

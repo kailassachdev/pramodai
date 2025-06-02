@@ -6,15 +6,18 @@
  * and returns an analysis of the plant's health, potential problems, and recommendations,
  * as well as identifying the plant, in the specified language.
  *
- * - analyzePlant - A function that handles the plant analysis process.
- * - AnalyzePlantInput - The input type for the analyzePlant function.
- * - AnalyzePlantOutput - The return type for the analyzePlant function.
+ * Exports:
+ * - analyzePlantFlow: The core Genkit flow for plant analysis.
+ * - AnalyzePlantInputSchema: Zod schema for input validation.
+ * - AnalyzePlantInput: The input type for the analyzePlantFlow.
+ * - AnalyzePlantOutputSchema: Zod schema for output.
+ * - AnalyzePlantOutput: The return type for the analyzePlantFlow.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-const AnalyzePlantInputSchema = z.object({
+export const AnalyzePlantInputSchema = z.object({
   photoDataUri: z
     .string()
     .describe(
@@ -26,7 +29,7 @@ const AnalyzePlantInputSchema = z.object({
 });
 export type AnalyzePlantInput = z.infer<typeof AnalyzePlantInputSchema>;
 
-const AnalyzePlantOutputSchema = z.object({
+export const AnalyzePlantOutputSchema = z.object({
   identification: z.object({
     isPlant: z.boolean().describe('Whether or not the image contains a plant.'),
     commonName: z.string().optional().describe('The common name of the identified plant (in the selected language).'),
@@ -46,15 +49,20 @@ const AnalyzePlantOutputSchema = z.object({
 });
 export type AnalyzePlantOutput = z.infer<typeof AnalyzePlantOutputSchema>;
 
-export async function analyzePlant(input: AnalyzePlantInput): Promise<AnalyzePlantOutput> {
-  return analyzePlantFlow(input);
-}
-
-const analyzePlantPrompt = ai.definePrompt({
-  name: 'analyzePlantPrompt',
-  input: {schema: AnalyzePlantInputSchema},
-  output: {schema: AnalyzePlantOutputSchema},
-  prompt: `You are a highly knowledgeable agricultural expert and plant diagnostician.
+// This is the core Genkit flow. It is NOT a Next.js Server Action.
+// It will be called by the API Route Handler.
+export const analyzePlantFlow = ai.defineFlow(
+  {
+    name: 'analyzePlantFlow', // Keep Genkit flow name
+    inputSchema: AnalyzePlantInputSchema,
+    outputSchema: AnalyzePlantOutputSchema,
+  },
+  async (input: AnalyzePlantInput) => { // Explicitly type input here for clarity
+    const analyzePlantPrompt = ai.definePrompt({
+      name: 'analyzePlantPrompt',
+      input: {schema: AnalyzePlantInputSchema}, // Schema for prompt input
+      output: {schema: AnalyzePlantOutputSchema}, // Schema for prompt output
+      prompt: `You are a highly knowledgeable agricultural expert and plant diagnostician.
 Your response MUST be in the language specified by the '{{language}}' parameter.
 
 First, identify the plant in the provided image. Determine if it is indeed a plant.
@@ -83,18 +91,10 @@ Vitamin Deficiencies: array of strings (in {{language}})
 Here is the plant image:
 {{media url=photoDataUri}}
 `,
-});
-
-const analyzePlantFlow = ai.defineFlow(
-  {
-    name: 'analyzePlantFlow',
-    inputSchema: AnalyzePlantInputSchema,
-    outputSchema: AnalyzePlantOutputSchema,
-  },
-  async input => {
+    });
+    
     const response = await analyzePlantPrompt(input);
     if (!response.output) {
-      // Log this server-side for visibility if possible. Netlify logs should capture this.
       console.error(`[analyzePlantFlow] Prompt returned no output. Input: ${JSON.stringify(input)}. Language: ${input.language}.`);
       throw new Error(
         'The AI model did not return a valid analysis. This could be due to the input image, content safety filters, or a temporary model issue. Please try a different image or try again later.'
