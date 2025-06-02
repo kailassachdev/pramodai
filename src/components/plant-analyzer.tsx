@@ -199,7 +199,7 @@ export default function PlantAnalyzer() {
                     <p className="mb-2 text-sm text-muted-foreground text-center">
                       <span className="font-semibold text-primary">Click to upload</span> or drag and drop
                     </p>
-                    <p className="text-xs text-muted-foreground">PNG, JPG, HEIC (MAX. 15MB recommended)</p>
+                    <p className="text-xs text-muted-foreground">PNG, JPG, HEIC (MAX. 1.5MB recommended)</p>
                   </div>
                 )}
                 <Input
